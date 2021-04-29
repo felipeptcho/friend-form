@@ -5,30 +5,124 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 First, run the development server:
 
 ```bash
+npm i
 npm run dev
-# or
-yarn dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+## Friend Form API
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
+You need to create a `FormFields` strucutre like this:
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+```javascript
+import { FormFields, FieldType } from '@/components/FriendForm';
 
-## Learn More
+const formFields: FormFields = [
+  {
+    name: 'textField',
+    label: 'Text field',
+    placeholder: 'My placeholder',
+    type: FieldType.TEXT,
+    required: true,
+    readOnly: false,
+    visible: (values) => (values.textField !== 'go away'),
+    validate: (value) => {
+      if (!value.startsWith('wooga.name')) {
+        return 'Not a valid name!';
+      }
+    },
+  },
+]
+```
 
-To learn more about Next.js, take a look at the following resources:
+After that, you can pass this structure to the `<FriendForm />` component:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```jsx
+import { FriendForm, FriendFormValues } from '@/components/FriendForm';
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+...
 
-## Deploy on Vercel
+const MyPage: React.FC = () => {
+  const handleSubmit = (values: FriendFormValues) => new Promise<void>((resolve) => {
+    setTimeout(() => {
+      alert(JSON.stringify(values, null, 2));
+      resolve();
+    }, 500);
+  });
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+  return (
+    <FriendForm
+      fields={formFields}
+      initialValues={{ textField: 'Initial value' }}
+      onSubmit={handleSubmit}
+    />
+  );
+};
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+## Custom components and Hooks
+
+You can import the hooks available in the project to have more control. For example, if you want to use your own custom fields you can use the `useField` hook and make your component return a `Field` interface (or an interface that extends the `Field` interface):
+
+```jsx
+import { useFriendFormContext, Field, useField } from '@/components/FriendForm';
+
+const Checkbox: Field = ({
+  name,
+}) => {
+  const [
+    { label: labelString, readOnly, value },
+    { error, touched },
+    { setValue },
+  ] = useField({ name });
+  const { handleBlur } = useFriendFormContext();
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setValue(e.target.checked);
+  };
+
+  return (
+    <label>
+      {labelString}
+      <input
+        type="checkbox"
+        name={name}
+        readOnly={readOnly}
+        checked={!!value}
+        onChange={handleChange}
+        onBlur={handleBlur}
+      />
+      {touched && error && <span className="error">{error}</span>}
+    </label>
+  );
+};
+```
+
+Then, you can pass an object containing all the custom fields of your project:
+
+```jsx
+import { FriendForm, FriendFormValues } from '@/components/FriendForm';
+
+const formFields: FormFields = [
+  {
+    name: 'checkboxField',
+    label: 'Custom Checkbox',
+    type: 'customCheckbox', // Use the custom type that you defined below.
+  },
+];
+
+const MyPage: React.FC = () => {
+  const handleSubmit = (values: FriendFormValues) => {
+    // submit code
+  };
+
+  return (
+    <FriendForm
+      fields={formFields}
+      customFields={{ customCheckbox: Checkbox }} // You can have this structure in a separate file.
+      onSubmit={handleSubmit}
+    />
+  );
+};
+```

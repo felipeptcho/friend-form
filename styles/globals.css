@@ -14,3 +14,47 @@ a {
 * {
   box-sizing: border-box;
 }
+
+form {
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.3);
+  margin: 10px auto;
+  max-width: 500px;
+  padding: 20px;
+}
+
+form label {
+  display: block;
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+form input {
+  display: block;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  font-size: 16px;
+  padding: 10px;
+  width: 100%;
+}
+
+form span.error {
+  color: #ff4d4f;
+}
+
+form button[type='submit'] {
+  background-color: #4f93ce;
+  border: 1px solid #4f93ce;
+  border-radius: 5px;
+  color: white;
+  font-size: 16px;
+  padding: 10px;
+  width: 100%;
+}
+
+form button[type='submit']:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
